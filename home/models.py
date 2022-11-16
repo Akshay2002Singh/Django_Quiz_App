@@ -14,3 +14,11 @@ class contact(models.Model):
 class quiz_question(models.Model):
     question_id = models.IntegerField()
     question = models.TextField()
+    option_1 = models.TextField()
+    option_2 = models.TextField()
+    option_3 = models.TextField()
+    option_4 = models.TextField()
+    answer = models.TextField()
+
+    def __str__(self):
+        return str(self.question_id)

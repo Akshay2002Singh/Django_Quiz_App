@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate, login ,logout
 from django.contrib.auth.models import User
-from home.models import contact
+from home.models import contact,quiz_question
 
 
 # Create your views here.
@@ -72,4 +72,37 @@ def submit_contact_form(request):
         temp_contact.save()
 
         return render(request,'contact_us.html',context)
+
+def add_question(request):
+    context = {
+        "login" : 0
+        }
+    if request.user.is_authenticated:
+        context["login"]=1
+        context["user"]=request.user.get_username()
+    
+    return render(request,"add_question.html",context)
+
+def add_question_form(request):
+    context = {
+        "login" : 0
+        }
+    if request.user.is_authenticated:
+        context["login"]=1
+        context["user"]=request.user.get_username()
+        context["msg"]="Question Added"
+
+    if request.method == "POST":
+        Question = request.POST.get('Question')
+        option_1 = request.POST.get('option_1')
+        option_2 = request.POST.get('option_2')
+        option_3 = request.POST.get('option_3')
+        option_4 = request.POST.get('option_4')
+        answer = request.POST.get('answer')
+        id = quiz_question.objects.all().count()
+        temp_question = quiz_question(question_id=id,question=Question,option_1=option_1,option_2=option_2,option_3=option_3,option_4=option_4,answer=answer)
+        temp_question.save()
+
+        return render(request,'add_question.html',context)
+
 

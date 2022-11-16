@@ -10,4 +10,6 @@ path("signup",views.create_user,name="create"),
 path("create_user_form",views.create_user_form,name="create_form"),
 path("contact_us",views.contact_us,name="contact_us"),
 path("submit_contact_form",views.submit_contact_form,name="submit_contact_form"),
+path("add_question",views.add_question),
+path("add_question_form",views.add_question_form),
 ]
