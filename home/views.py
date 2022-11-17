@@ -1,8 +1,9 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate, login ,logout
 from django.contrib.auth.models import User
-from home.models import contact,quiz_question
-
+from home.models import contact,quiz_question,quiz_submissions
+import json
+import random
 
 # Create your views here.
 def index(request):
@@ -104,5 +105,75 @@ def add_question_form(request):
         temp_question.save()
 
         return render(request,'add_question.html',context)
+    
+def attempt_quiz(request):
+    context = {
+        "login" : 0
+        }
+    if request.user.is_authenticated:
+        context["login"]=1
+        context["user"]=request.user.get_username()
 
+    t_check = quiz_submissions.objects.filter(username=request.user.get_username())
+    if(t_check):
+        # print("user exist")
+        user_data = quiz_submissions.objects.get(username=request.user.get_username())
+        t_remain = json.loads(user_data.remain)
+        if(len(t_remain)==0):
+            return render(request,"done_quiz.html",context)
+        q_id = random.choice(t_remain)
+        question_data = quiz_question.objects.get(question_id=q_id)
+        print(question_data.question)
+        context["question"] = question_data
+
+    else:
+        # print("user not exist")
+        total_questions = quiz_question.objects.all().count()
+        remaining = [i for i in range(total_questions)]
+        remaining = json.dumps(remaining)
+        ans = {}
+        ans = json.dumps(ans)
+        t_entry = quiz_submissions(username=request.user.get_username(),remain=remaining,my_ans=ans,score=0)
+        print(t_entry)
+        t_entry.save()
+        return redirect('/attempt_quiz')
+    
+    return render(request,"attempt_quiz.html",context)
+    # return redirect("/")
+
+def submit_question(request):
+    if request.method == "POST":
+        user_ans = request.POST.get('my_ans')
+        q_id = request.POST.get('id')
+        q_id = int(q_id)
+        question = quiz_question.objects.get(question_id=q_id)
+        # print(user_ans == question.answer)
+
+        # modifing userdata of submissions table 
+        user_data = quiz_submissions.objects.get(username=request.user.get_username())
+        t_remain = json.loads(user_data.remain)
+        t_remain.remove(q_id)
+        t_ans = json.loads(user_data.my_ans)
+        t_ans[q_id] = user_ans
+        t_score = user_data.score
+        if(user_ans == question.answer):
+            t_score+=1
+
+        quiz_submissions.objects.filter(username=request.user.get_username()).update(remain=json.dumps(t_remain),score=t_score,my_ans=json.dumps(t_ans))
+    
+        
+    return redirect('/attempt_quiz')
+
+def result(request):
+    context = {
+        "login" : 0
+        }
+    if request.user.is_authenticated:
+        context["login"]=1
+        context["user"]=request.user.get_username()
+    
+    result = quiz_submissions.objects.all()
+    context["users"] = result.order_by('-score').values()
+    
+    return render(request,"result.html",context)
 

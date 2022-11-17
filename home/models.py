@@ -22,3 +22,12 @@ class quiz_question(models.Model):
 
     def __str__(self):
         return str(self.question_id)
+    
+class quiz_submissions(models.Model):
+    username = models.CharField(max_length=255)
+    remain = models.TextField()
+    my_ans = models.TextField()
+    score = models.IntegerField()
+
+    def __str__(self):
+        return self.username
