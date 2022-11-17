@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import authenticate, login ,logout
 from django.contrib.auth.models import User
-from home.models import contact,quiz_question,quiz_submissions
+from home.models import contact,quiz_question,quiz_submissions,admin_access
 import json
 import random
 
@@ -76,7 +76,8 @@ def submit_contact_form(request):
 
 def add_question(request):
     context = {
-        "login" : 0
+        "login" : 0,
+        "admin" : 0
         }
     if request.user.is_authenticated:
         context["login"]=1
@@ -102,17 +103,42 @@ def add_question_form(request):
         answer = request.POST.get('answer')
         id = quiz_question.objects.all().count()
         temp_question = quiz_question(question_id=id,question=Question,option_1=option_1,option_2=option_2,option_3=option_3,option_4=option_4,answer=answer)
+        print(request.FILES.keys())
+        try:
+            temp_question.question_image = request.FILES['question_image']
+        except:
+            pass
+        try:
+            temp_question.option_1_image = request.FILES['option_1_image']
+        except:
+            pass
+        try:
+            temp_question.option_2_image = request.FILES['option_2_image']
+        except:
+            pass
+        try:
+            temp_question.option_3_image = request.FILES['option_3_image']
+        except:
+            pass
+        try:
+            temp_question.option_4_image = request.FILES['option_4_image']
+        except:
+            pass
+        
         temp_question.save()
 
         return render(request,'add_question.html',context)
     
 def attempt_quiz(request):
     context = {
-        "login" : 0
+        "login" : 0,
+        "access" : 0
         }
     if request.user.is_authenticated:
         context["login"]=1
         context["user"]=request.user.get_username()
+    if admin_access.objects.get(control="allow_quiz_acess").value :
+         context["access"]=1
 
     t_check = quiz_submissions.objects.filter(username=request.user.get_username())
     if(t_check):
@@ -123,8 +149,10 @@ def attempt_quiz(request):
             return render(request,"done_quiz.html",context)
         q_id = random.choice(t_remain)
         question_data = quiz_question.objects.get(question_id=q_id)
-        print(question_data.question)
+        # if(question_data.question_image):
+        #     print(question_data.question_image)
         context["question"] = question_data
+        context["msg"] = f"Remaining Questions : {len(t_remain)}"
 
     else:
         # print("user not exist")
@@ -166,11 +194,15 @@ def submit_question(request):
 
 def result(request):
     context = {
-        "login" : 0
+        "login" : 0,
+        "access" : 0
         }
     if request.user.is_authenticated:
         context["login"]=1
         context["user"]=request.user.get_username()
+    
+    if admin_access.objects.get(control="show_result").value :
+         context["access"]=1
     
     result = quiz_submissions.objects.all()
     context["users"] = result.order_by('-score').values()
