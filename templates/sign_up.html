@@ -26,7 +26,12 @@
     <title>Login</title>
 </head>
 <body>
-
+    {% if msg %}
+  <div class="alert alert-danger alert-dismissible fade show text-center fs-2" role="alert">
+    <strong>{{msg}}</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  {% endif %}
     <div class="container" id="Contact-us">
         <div class="selfhead text-center py-0">
             SignUp

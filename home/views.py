@@ -27,21 +27,26 @@ def login_form(request):
             login(request,user)
             return redirect ("/")
         else:
-            return redirect("/login")
+            return render(request,'login.html',context={"msg":"Invalid Credentials"})
 
 def create_user(request):
     return render(request,"sign_up.html")
 
 def create_user_form(request):
     if request.method == "POST":
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = User.objects.create_user(username,email,password)
-        user.first_name=name
-        user.save()
-        return render(request,'login.html')
+        try:
+            name = request.POST.get('name')
+            email = request.POST.get('email')
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = User.objects.create_user(username,email,password)
+            user.first_name=name
+            user.save()
+            return render(request,'login.html',context={"msg":"Login to Continue"})
+        except:
+            return render(request,"sign_up.html",context={"msg":"This username is already taken, try any other"})
+    
+        
 
 def log_out(request):
     logout(request)
