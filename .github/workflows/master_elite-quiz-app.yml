@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'Elite-Quiz-App'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_126217BC9F6E429B9DA0CDE362D94CEE }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_39316790D91A422485179F8EAF2A687C }}
